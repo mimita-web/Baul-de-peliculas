@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Baúl de películas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,600&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:           #181818;
+      --surface:      #202020;
+      --card:         #262626;
+      --border:       #383838;
+      --gold:         #c9a84c;
+      --gold-dim:     #7a6030;
+      --white:        #f0ece3;
+      --muted:        #a6a6a6;
+      --font-display: 'Syne', sans-serif;
+      --font-italic:  'Fraunces', serif;
+      --font-body:    'Space Grotesk', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* NAVEGACIÓN SUPERIOR */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(24, 24, 24, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 48px;
+      min-height: 64px;
+    }
+
+    .logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: 2.5px;
+      color: var(--gold);
+      cursor: pointer;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-tab {
+      background: none;
+      border: none;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 8px 12px;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+    }
+    .nav-tab:hover { color: var(--white); }
+    .nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    .btn {
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      background: transparent;
+      padding: 7px 20px;
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+    .btn:hover          { background: var(--gold); color: #141414; }
+    .btn.solid          { background: var(--gold); color: #141414; border-color: var(--gold); }
+    .btn.solid:hover    { background: #ddb95a; }
+
+    .main-container {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 48px;
+    }
+
+    /* CONTROL DE VISTAS (SPA) */
+    .page-view {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .page-view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* CARRUSEL HERO */
+    .carousel {
+      position: relative;
+      height: 480px;
+      margin-bottom: 40px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .carousel-track {
+      display: flex;
+      height: 100%;
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .carousel-slide {
+      position: relative;
+      min-width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: flex-end;
+      padding: 48px;
+      overflow: hidden;
+    }
+
+    .carousel-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      filter: brightness(0.75);
+    }
+
+    .carousel-gradient {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to right, rgba(24,24,24,0.96) 36%, rgba(24,24,24,0.62) 64%, rgba(24,24,24,0.2) 100%),
+        linear-gradient(to top, rgba(24,24,24,0.95) 0%, transparent 55%);
+      z-index: 1;
+    }
+
+    .carousel-content {
+      position: relative;
+      max-width: 590px;
+      z-index: 2;
+    }
+
+    .hero-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .carousel-content h1 {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 3.1rem;
+      line-height: 1.05;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .carousel-content h1 em {
+      font-family: var(--font-italic);
+      font-style: italic;
+      font-weight: 600;
+      font-size: 3.4rem;
+      color: var(--gold);
+    }
+
+    .carousel-content p {
+      color: #d4d4d4;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      margin-bottom: 18px;
+    }
+
+    .carousel-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 5;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(24, 24, 24, 0.85);
+      border: 1px solid var(--border);
+      color: var(--white);
+      font-size: 1.35rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .carousel-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(24, 24, 24, 0.98); }
+    .carousel-btn.prev { left: 16px; }
+    .carousel-btn.next { right: 16px; }
+
+    .carousel-dots {
+      position: absolute;
+      bottom: 18px;
+      right: 28px;
+      z-index: 5;
+      display: flex;
+      gap: 8px;
+    }
+
+    .carousel-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid var(--gold);
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      transition: all 0.2s;
+    }
+    .carousel-dot.active {
+      background: var(--gold);
+      transform: scale(1.2);
+    }
+
+    .section-label { font-size: 0.62rem; font-weight: 600; letter-spacing: 3.5px; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+    .section-title { font-family: var(--font-display); font-weight: 800; font-size: 1.9rem; letter-spacing: 1px; line-height: 1.1; margin-bottom: 24px; }
+    .section-title em { font-family: var(--font-italic); font-style: italic; font-size: 2.15rem; color: var(--gold); }
+
+    /* GRILLA DE PELÍCULAS */
+    .movies-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .movie-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.3s;
+    }
+    .movie-card:hover { border-color: var(--gold-dim); }
+
+    .movie-img-container { position: relative; width: 100%; aspect-ratio: 2/3; overflow: hidden; background: var(--surface); }
+    .movie-card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.85); transition: filter 0.4s, transform 0.5s; }
+    .movie-card:hover img { filter: brightness(0.4); transform: scale(1.05); }
+
+    .movie-card-info { padding: 14px; display: flex; flex-direction: column; gap: 6px; background: var(--card); flex-grow: 1; }
+    .movie-card-header { display: flex; justify-content: space-between; align-items: center; }
+    .movie-card-genre { font-size: 0.6rem; font-weight: 600; letter-spacing: 1.8px; text-transform: uppercase; color: var(--gold); }
+    .movie-card-title { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.5px; line-height: 1.2; color: var(--white); }
+    .movie-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .platforms-container { display: flex; gap: 6px; margin-top: 6px; align-items: center; flex-wrap: wrap; }
+    .platform-badge { font-size: 0.58rem; padding: 2px 6px; border-radius: 4px; background: var(--surface); border: 1px solid var(--border); color: #ccc; }
+    .platform-badge.netflix { border-color: #e50914; color: #ff4d4d; }
+    .platform-badge.prime { border-color: #00a8e1; color: #00a8e1; }
+    .platform-badge.max { border-color: #582fff; color: #9d85ff; }
+    .platform-badge.disney { border-color: #113ccf; color: #6183ff; }
+    .platform-badge.apple { border-color: #aaaaaa; color: #ffffff; }
+
+    .stars { color: var(--gold); font-size: 0.75rem; }
+
+    .trailer-btn {
+      position: absolute;
+      top: 45%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      z-index: 10;
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      background: rgba(24, 24, 24, 0.85);
+      color: var(--gold);
+      border: 2px solid var(--gold);
+      font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; opacity: 0; transition: all 0.3s;
+    }
+    .movie-card:hover .trailer-btn { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    .trailer-btn:hover { background: var(--gold); color: #141414; }
+
+    /* PLANES */
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      align-items: stretch;
+      margin-top: 10px;
+    }
+
+    .plan-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px 22px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: transform 0.3s, border-color 0.3s;
+    }
+    .plan-card:hover { transform: translateY(-4px); border-color: var(--gold-dim); }
+    .plan-card.featured { border: 2px solid var(--gold); background: linear-gradient(180deg, rgba(201,168,76,0.06) 0%, var(--card) 100%); }
+
+    .plan-badge { position: absolute; top: -11px; right: 16px; background: var(--gold); color: #141414; font-size: 0.55rem; font-weight: 700; letter-spacing: 2px; padding: 3px 10px; text-transform: uppercase; border-radius: 20px; }
+    .plan-name { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; letter-spacing: 1px; margin-bottom: 4px; }
+    .plan-price { font-size: 2rem; font-weight: 700; color: var(--gold); margin-bottom: 6px; }
+    .plan-price span { font-size: 0.8rem; color: var(--muted); font-weight: 400; }
+    .plan-desc { font-size: 0.78rem; color: var(--muted); margin-bottom: 20px; line-height: 1.4; }
+    .plan-features { list-style: none; margin-bottom: 24px; flex-grow: 1; }
+    .plan-features li { font-size: 0.8rem; color: #ccc; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .plan-features li::before { content: '✓'; color: var(--gold); font-weight: bold; }
+
+    /* PERFIL Y EDICIÓN DE USUARIO */
+    .profile-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--gold);
+      padding: 28px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 8px;
+    }
+
+    .profile-user-details { display: flex; align-items: center; gap: 20px; }
+    .profile-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 2px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      color: var(--gold);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .profile-info h3 { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; letter-spacing: 1px; }
+    .profile-info p.email { color: var(--muted); font-size: 0.8rem; }
+    .profile-bio { font-size: 0.85rem; color: #ddd; margin-top: 6px; font-style: italic; max-width: 450px; line-height: 1.4; }
+
+    .profile-stats { display: flex; gap: 16px; }
+    .stat-box { text-align: center; background: var(--surface); border: 1px solid var(--border); padding: 10px 18px; border-radius: 6px; min-width: 90px; }
+    .stat-box .num { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; color: var(--gold); line-height: 1.1; }
+    .stat-box .label { font-size: 0.55rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+
+    /* SECCIÓN AMIGOS */
+    .friends-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+    .friends-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .friend-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .friend-info { display: flex; align-items: center; gap: 10px; }
+    .friend-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--card); border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: var(--gold); }
+    .friend-name { font-size: 0.85rem; font-weight: 500; }
+    .btn-remove-friend { background: none; border: none; color: #ff5555; cursor: pointer; font-size: 0.8rem; opacity: 0.7; }
+    .btn-remove-friend:hover { opacity: 1; }
+
+    /* RESEÑAS Y FORMULARIO */
+    .review-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    .form-panel { background: var(--card); border: 1px solid var(--border); padding: 28px; border-radius: 8px; }
+    .field { margin-bottom: 18px; }
+    .field label { display: block; font-size: 0.62rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .field input, .field select, .field textarea {
+      width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--white); padding: 9px 12px; font-family: var(--font-body); font-size: 0.85rem; outline: none; transition: border-color 0.2s; border-radius: 4px;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--gold); }
+    .field textarea { resize: vertical; min-height: 80px; }
+
+    .stars-input { display: flex; flex-direction: row-reverse; gap: 4px; justify-content: flex-end; }
+    .stars-input input { display: none; }
+    .stars-input label { font-size: 1.5rem; color: var(--border); cursor: pointer; transition: color 0.1s; }
+    .stars-input label:hover, .stars-input label:hover ~ label, .stars-input input:checked ~ label { color: var(--gold); }
+    .stars-hint { font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
+
+    .reviews-panel { display: flex; flex-direction: column; gap: 8px; }
+    .review-item { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--gold); padding: 14px 16px; border-radius: 4px; }
+    .review-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
+    .review-title { font-size: 0.95rem; font-weight: 500; }
+    .review-genre { font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .review-text { font-size: 0.8rem; color: #b5b5b5; line-height: 1.5; }
+    .delete-review-btn { background: none; border: none; color: #ff5555; font-size: 0.75rem; cursor: pointer; opacity: 0.7; }
+    .delete-review-btn:hover { opacity: 1; }
+
+    .empty-msg { color: var(--muted); font-size: 0.85rem; padding: 24px 0; text-align: center; border: 1px dashed var(--border); border-radius: 4px; }
+
+    /* SECCIÓN IA */
+    .ai-panel { background: var(--card); border: 1px solid var(--border); padding: 32px; border-radius: 8px; }
+    .ai-badge { font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); border: 1px solid var(--gold-dim); padding: 3px 8px; border-radius: 4px; }
+    .ai-desc { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; line-height: 1.6; }
+    .ai-response { margin-top: 20px; font-size: 0.88rem; line-height: 1.8; color: #d4d4d4; white-space: pre-wrap; }
+
+    .thinking { color: var(--muted); font-style: italic; display: flex; align-items: center; gap: 8px; }
+    .dot-pulse { display: flex; gap: 4px; }
+    .dot-pulse span { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); animation: pulse 1.2s ease-in-out infinite; }
+    .dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
+    .dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.1); } }
+
+    /* MODALES & OVERLAYS */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.78); backdrop-filter: blur(6px); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .overlay.open { opacity: 1; pointer-events: all; }
+    .modal { background: var(--card); border: 1px solid var(--border); width: 100%; max-width: 440px; padding: 32px; position: relative; border-radius: 8px; }
+    .modal-close { position: absolute; top: 14px; right: 18px; background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; }
+    .modal-logo { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; letter-spacing: 2.5px; color: var(--gold); }
+    .modal-sub { color: var(--muted); font-size: 0.8rem; margin-bottom: 20px; }
+
+    .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    .tab { background: none; border: none; font-family: var(--font-body); font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 8px 14px; border-bottom: 2px solid transparent; cursor: pointer; }
+    .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .modal-success { display: none; text-align: center; padding: 20px 0; }
+    .modal-success .icon { font-size: 2.5rem; display: block; margin-bottom: 8px; }
+    .modal-success h3 { font-family: var(--font-display); font-size: 1.3rem; color: var(--gold); }
+
+    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--card); border: 1px solid var(--gold); padding: 12px 18px; z-index: 300; max-width: 320px; opacity: 0; transform: translateY(16px); pointer-events: none; transition: all 0.3s; border-radius: 4px; }
+    .toast.show { opacity: 1; transform: translateY(0); pointer-events: all; }
+    .toast p { font-size: 0.8rem; color: #d4d4d4; }
+    .toast b { color: var(--gold); }
+
+    footer { border-top: 1px solid var(--border); padding: 20px 48px; display: flex; justify-content: space-between; align-items: center; margin-top: auto; background: var(--surface); }
+    footer p { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+    @media (max-width: 900px) {
+      nav, .main-container, footer { padding-left: 16px; padding-right: 16px; }
+      .carousel { height: 370px; }
+      .carousel-slide { padding: 24px 20px 44px; }
+      .carousel-content h1 { font-size: 2.1rem; }
+      .carousel-content h1 em { font-size: 2.35rem; }
+      .carousel-btn { width: 34px; height: 34px; font-size: 1.1rem; }
+      .carousel-btn.prev { left: 8px; }
+      .carousel-btn.next { right: 8px; }
+      .movies-grid { grid-template-columns: repeat(2, 1fr); }
+      .plans-grid { grid-template-columns: 1fr; }
+      .review-layout { grid-template-columns: 1fr; }
+      .profile-card { flex-direction: column; gap: 16px; text-align: center; }
+      .profile-user-details { flex-direction: column; text-align: center; }
+      .profile-stats { justify-content: center; }
+    }
+
+    /* AVATARES ILUSTRADOS */
+    .profile-avatar {
+      padding: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+    .avatar-img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .avatar-selector {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      justify-items: center;
+      max-width: 360px;
+      margin: 0 auto 18px;
+    }
+    .avatar-option {
+      appearance: none;
+      width: 68px;
+      height: 68px;
+      padding: 0;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+    .avatar-option .avatar-img {
+      width: 100%;
+      height: 100%;
+    }
+    .avatar-option:hover {
+      border-color: var(--gold-dim);
+      transform: translateY(-2px) scale(1.04);
+    }
+    .avatar-option.selected {
+      border: 3px solid var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,.16), 0 0 18px rgba(201,168,76,.22);
+      background: transparent;
+    }
+    #modalEditarPerfilOverlay .modal {
+      max-width: 520px;
+    }
+    .friend-avatar {
+      padding: 0;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .friend-avatar-img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+    .nav-avatar {
+      width: 28px;
+      height: 28px;
+      display: inline-block;
+      vertical-align: middle;
+      border-radius: 50%;
+      border: 1px solid var(--gold);
+      margin-right: 5px;
+      object-fit: cover;
+    }
+    .review-author {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: .68rem;
+      letter-spacing: .3px;
+    }
+    .review-author-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1px solid var(--gold-dim);
+      object-fit: cover;
+    }
+    @media (max-width: 520px) {
+      .avatar-selector { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .avatar-option { width: 64px; height: 64px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVEGACIÓN PRINCIPAL -->
+<nav>
+  <div class="logo" onclick="mostrarVista('peliculas')">BAÚL DE PELÍCULAS</div>
+  <div class="nav-links">
+    <button class="nav-tab active" id="tabNavPeliculas" onclick="mostrarVista('peliculas')">Películas</button>
+    <button class="nav-tab" id="tabNavPlanes" onclick="mostrarVista('planes')">Planes</button>
+    <button class="nav-tab" id="tabNavResenas" onclick="mostrarVista('resenas')">Reseñas</button>
+    <button class="nav-tab" id="tabNavIA" onclick="mostrarVista('ia')">IA</button>
+    <button class="nav-tab" id="tabNavPerfil" style="display:none; color: var(--gold);" onclick="mostrarVista('perfil')">Mi Perfil</button>
+    <div id="navUsuario">
+      <button class="btn" onclick="abrirModal()">Registrarse</button>
+    </div>
+  </div>
+</nav>
+
+<div class="main-container">
+
+  <!-- VISTA 1: PELÍCULAS -->
+  <div class="page-view active" id="viewPeliculas">
+    <div class="carousel" id="heroCarousel">
+      <div class="carousel-track" id="carouselTrack"></div>
+      <button class="carousel-btn prev" type="button" onclick="moverCarrusel(-1)" aria-label="Anterior">‹</button>
+      <button class="carousel-btn next" type="button" onclick="moverCarrusel(1)" aria-label="Siguiente">›</button>
+      <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+
+    <div class="section-label">Catálogo</div>
+    <div class="section-title">Películas <em>destacadas</em></div>
+
+    <input
+      type="text"
+      id="buscador"
+      placeholder="Buscar película por título o género..."
+      oninput="filtrarPeliculas()"
+      style="
+        width: 100%;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--gold);
+        color: var(--white);
+        padding: 10px 14px;
+        font-family: var(--font-body);
+        font-size: 0.85rem;
+        outline: none;
+        margin-bottom: 20px;
+        border-radius: 4px;
+      "
+    >
+    <div class="movies-grid" id="moviesGrid"></div>
+  </div>
+
+  <!-- VISTA 2: PLANES -->
+  <div class="page-view" id="viewPlanes">
+    <div class="section-label">Membresías</div>
+    <div class="section-title">Planes de <em>Suscripción</em></div>
+
+    <div class="plans-grid">
+      <!-- Plan Básico -->
+      <div class="plan-card">
+        <div class="plan-name">Básico</div>
+        <div class="plan-price">$0 <span>/ mes</span></div>
+        <div class="plan-desc">Para entusiastas del cine que están empezando a explorar y reseñar.</div>
+        <ul class="plan-features">
+          <li>Acceso al catálogo completo</li>
+          <li>Escribir y guardar reseñas</li>
+          <li>1 consulta IA al mes</li>
+        </ul>
+        <button class="btn" style="width:100%;" onclick="seleccionarPlan('Básico', 0)">Plan Actual</button>
+      </div>
+
+      <!-- Plan Cinéfilo Pro -->
+      <div class="plan-card featured">
+        <span class="plan-badge">Popular</span>
+        <div class="plan-name">Cinéfilo Pro</div>
+        <div class="plan-price">$4.99 <span>/ mes</span></div>
+        <div class="plan-desc">Ideal para amantes del cine que quieren recomendaciones ilimitadas y personalizadas.</div>
+        <ul class="plan-features">
+          <li>Todo lo del plan Básico</li>
+          <li>Recomendaciones IA ilimitadas</li>
+          <li>Insignia "Cinéfilo Pro"</li>
+          <li>Sin publicidad en la plataforma</li>
+        </ul>
+        <button class="btn solid" style="width:100%;" onclick="seleccionarPlan('Cinéfilo Pro', 4.99)">Suscribirme Pro</button>
+      </div>
+
+      <!-- Plan VIP Director -->
+      <div class="plan-card">
+        <div class="plan-name">VIP Director</div>
+        <div class="plan-price">$9.99 <span>/ mes</span></div>
+        <div class="plan-desc">Para críticos exigentes que buscan análisis profundos y acceso anticipado.</div>
+        <ul class="plan-features">
+          <li>Todo lo del plan Cinéfilo Pro</li>
+          <li>Acceso a preestrenos y eventos</li>
+          <li>Análisis de reseñas con IA</li>
+        </ul>
+        <button class="btn" style="width:100%;" onclick="seleccionarPlan('VIP Director', 9.99)">Obtener VIP</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISTA 3: RESEÑAS -->
+  <div class="page-view" id="viewResenas">
+    <div class="section-label">Tu opinión</div>
+    <div class="section-title">Escribí tu <em>reseña</em></div>
+
+    <div class="review-layout">
+      <div class="form-panel">
+        <div class="field">
+          <label>Película</label>
+          <input type="text" id="inputPelicula" placeholder="Ej. Mulholland Drive (2001)">
+        </div>
+
+        <div class="field">
+          <label>Género</label>
+          <select id="inputGenero">
+            <option value="">— Seleccioná un género —</option>
+            <option>Drama</option>
+            <option>Terror</option>
+            <option>Comedia</option>
+            <option>Sci-Fi</option>
+            <option>Thriller</option>
+            <option>Animación</option>
+            <option>Acción</option>
+            <option>Romance</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Puntuación</label>
+          <div class="stars-input">
+            <input type="radio" name="rating" id="s5" value="5"><label for="s5">★</label>
+            <input type="radio" name="rating" id="s4" value="4"><label for="s4">★</label>
+            <input type="radio" name="rating" id="s3" value="3"><label for="s3">★</label>
+            <input type="radio" name="rating" id="s2" value="2"><label for="s2">★</label>
+            <input type="radio" name="rating" id="s1" value="1"><label for="s1">★</label>
+          </div>
+          <div class="stars-hint" id="starsHint">Seleccioná una puntuación</div>
+        </div>
+
+        <div class="field">
+          <label>Reseña</label>
+          <textarea id="inputResena" placeholder="¿Qué te pareció? Sé honesto..."></textarea>
+        </div>
+
+        <div class="field">
+          <label>Link del trailer (opcional)</label>
+          <input type="url" id="inputTrailer" placeholder="https://youtube.com/...">
+        </div>
+
+        <button class="btn solid" style="width:100%; padding:12px;" onclick="publicarResena()">
+          Publicar reseña
+        </button>
+      </div>
+
+      <div>
+        <div style="font-size:0.62rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px;">
+          Reseñas publicadas recientemente
+        </div>
+        <div class="reviews-panel" id="listaResenas">
+          <div class="empty-msg" id="emptyMsg">
+            Todavía no publicaste ninguna reseña.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISTA 4: IA -->
+  <div class="page-view" id="viewIA">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:24px;">
+      <div>
+        <div class="section-label">Inteligencia Artificial</div>
+        <div class="section-title" style="margin-bottom:0">Películas <em>para vos</em></div>
+      </div>
+      <span class="ai-badge">Asistente de cine</span>
+    </div>
+
+    <div class="ai-panel">
+      <p class="ai-desc">
+        Podés conversar sobre películas, pedir recomendaciones y dejar que la IA tenga en cuenta tus reseñas, puntuaciones y comentarios para conocer tus gustos.
+      </p>
+
+      <div id="chatIA" style="margin-top:18px;">
+        <div id="mensajesIA" class="ai-response" aria-live="polite" style="min-height:130px; max-height:360px; overflow-y:auto; border:1px solid var(--border); padding:16px; border-radius:6px; margin:0 0 14px;">
+          <p style="margin:0;">¡Hola! Soy tu asistente de cine. Podés preguntarme qué película ver, pedirme recomendaciones o contarme qué tipo de historias te gustan. También puedo tener en cuenta tus reseñas.</p>
+        </div>
+        <form id="formularioIA" style="display:flex; gap:10px; align-items:stretch; flex-wrap:wrap;">
+          <input id="entradaIA" type="text" placeholder="Escribile algo a la IA..." autocomplete="off" required
+            style="flex:1; min-width:200px; background:var(--surface); color:var(--white); border:1px solid var(--border); border-radius:4px; padding:12px; font:inherit;">
+          <button class="btn solid" id="btnEnviarIA" type="submit">Enviar</button>
+          <button class="btn" id="btnLimpiarIA" type="button" onclick="limpiarChatIA()">Limpiar chat</button>
+        </form>
+        <button class="btn solid" id="btnIA" onclick="pedirRecomendaciones()" style="margin-top:14px;">
+          ✦ Recomendame películas según mis reseñas
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISTA 5: PERFIL DE USUARIO -->
+  <div class="page-view" id="viewPerfil">
+    <div class="section-label">Panel Personal</div>
+    <div class="section-title">Mi <em>Perfil Cinéfilo</em></div>
+
+    <!-- TARJETA PRINCIPAL DEL PERFIL -->
+    <div class="profile-card">
+      <div class="profile-user-details">
+        <div class="profile-avatar" id="profileAvatar"><img class="avatar-img" src="avatares/avatar-01.svg" alt="Avatar de perfil"></div>
+        <div class="profile-info">
+          <h3 id="profileNombre">Nombre Usuario</h3>
+          <p class="email" id="profileEmail">email@usuario.com</p>
+          <p class="profile-bio" id="profileBio">Sin descripción todavía. ¡Editar perfil para escribir algo!</p>
+          <div style="margin-top: 8px; display:flex; gap: 8px; align-items:center;">
+            <span id="profilePlanBadge" style="font-size:0.6rem; padding: 2px 6px; border: 1px solid var(--gold); color: var(--gold); text-transform:uppercase;">Plan Básico</span>
+            <button class="btn" style="padding: 2px 8px; font-size: 0.6rem;" onclick="abrirModalEditarPerfil()">✎ Editar Mi Perfil</button>
+          </div>
+        </div>
+      </div>
+      <div class="profile-stats">
+        <div class="stat-box">
+          <div class="num" id="statTotalResenas">0</div>
+          <div class="label">Reseñas</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" id="statPromedioPuntuacion">0.0</div>
+          <div class="label">Promedio ★</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" id="statTotalAmigos">0</div>
+          <div class="label">Amigos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN AMIGOS -->
+    <div class="friends-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-size:0.62rem; letter-spacing:2px; text-transform:uppercase; color:var(--gold);">
+          Mis Amigos Cinéfilos
+        </div>
+        <button class="btn" style="padding: 4px 10px; font-size: 0.62rem;" onclick="abrirModalAgregarAmigo()">+ Agregar Amigo</button>
+      </div>
+      <div class="friends-grid" id="listaAmigos">
+        <div class="empty-msg" style="grid-column: 1 / -1; margin-top: 10px;">Todavía no agregaste amigos a tu lista.</div>
+      </div>
+    </div>
+
+    <div style="font-size:0.62rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px;">
+      Mis reseñas guardadas
+    </div>
+    <div class="reviews-panel" id="listaResenasPerfil"></div>
+  </div>
+
+</div>
+
+<footer>
+  <p>© 2026 Baúl de Películas</p>
+  <div class="logo" onclick="mostrarVista('peliculas')">BAÚL DE PELÍCULAS</div>
+</footer>
+
+<!-- MODAL REGISTRO / LOGIN -->
+<div class="overlay" id="overlay" onclick="clickOverlay(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="cerrarModal()">×</button>
+    <div class="modal-logo">BAÚL DE PELÍCULAS</div>
+    <div class="modal-sub">Únete a la comunidad cinéfila</div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="cambiarTab('registro')">Registrarse</button>
+      <button class="tab"        onclick="cambiarTab('login')">Iniciar sesión</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-registro">
+      <div class="field">
+        <label>Usuario</label>
+        <input type="text" id="regUsuario" placeholder="tu_nombre_de_cine">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="regEmail" placeholder="tu@email.com">
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="regPass" placeholder="••••••••">
+      </div>
+      <button class="btn solid" style="width:100%; padding:11px;" onclick="registrar()">
+        Crear cuenta
+      </button>
+    </div>
+
+    <div class="tab-panel" id="tab-login">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="tu@email.com">
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="loginPass" placeholder="••••••••">
+      </div>
+      <button class="btn solid" style="width:100%; padding:11px;" onclick="iniciarSesion()">
+        Entrar
+      </button>
+    </div>
+
+    <div class="modal-success" id="modalSuccess">
+      <span class="icon">🎬</span>
+      <h3>¡Bienvenido!</h3>
+      <p>Tu cuenta fue creada correctamente.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR MI PERFIL -->
+<div class="overlay" id="modalEditarPerfilOverlay" onclick="clickEditarPerfilOverlay(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="cerrarModalEditarPerfil()">×</button>
+    <div class="modal-logo">EDITAR MI PERFIL</div>
+    <div class="modal-sub">Elige tu avatar y escribe tu biografía</div>
+
+    <div class="field">
+      <label>Elegí tu Avatar</label>
+      <div class="avatar-selector" id="avatarSelector">
+        <button type="button" class="avatar-option" onclick="seleccionarAvatar('avatar-01')" data-avatar="avatar-01" aria-label="Elegir avatar Cinéfilo clásico" title="Cinéfilo clásico"><img class="avatar-img" src="avatares/avatar-01.svg" alt="Cinéfilo clásico"></button>
+        <button type="button" class="avatar-option" onclick="seleccionarAvatar('avatar-02')" data-avatar="avatar-02" aria-label="Elegir avatar Melena oscura" title="Melena oscura"><img class="avatar-img" src="avatares/avatar-02.svg" alt="Melena oscura"></button>
+        <button type="button" class="avatar-option" onclick="seleccionarAvatar('avatar-03')" data-avatar="avatar-03" aria-label="Elegir avatar Pelirroja" title="Pelirroja"><img class="avatar-img" src="avatares/avatar-03.svg" alt="Pelirroja"></button>
+        <button type="button" class="avatar-option" onclick="seleccionarAvatar('avatar-04')" data-avatar="avatar-04" aria-label="Elegir avatar Rulos" title="Rulos"><img class="avatar-img" src="avatares/avatar-04.svg" alt="Rulos"></button>
+        <button type="button" class="avatar-option" onclick="seleccionarAvatar('avatar-05')" data-avatar="avatar-05" aria-label="Elegir avatar Auriculares" title="Auriculares"><img class="avatar-img" src="avatares/avatar-05.svg" alt="Auriculares"></button>
+        <button type="button" class="avatar-option" onclick="seleccionarAvatar('avatar-06')" data-avatar="avatar-06" aria-label="Elegir avatar Rubio" title="Rubio"><img class="avatar-img" src="avatares/avatar-06.svg" alt="Rubio"></button>
+        <button type="button" class="avatar-option" onclick="seleccionarAvatar('avatar-07')" data-avatar="avatar-07" aria-label="Elegir avatar Afro" title="Afro"><img class="avatar-img" src="avatares/avatar-07.svg" alt="Afro"></button>
+        <button type="button" class="avatar-option" onclick="seleccionarAvatar('avatar-08')" data-avatar="avatar-08" aria-label="Elegir avatar Gorro" title="Gorro"><img class="avatar-img" src="avatares/avatar-08.svg" alt="Gorro"></button>
+        <button type="button" class="avatar-option" onclick="seleccionarAvatar('avatar-09')" data-avatar="avatar-09" aria-label="Elegir avatar Anteojos" title="Anteojos"><img class="avatar-img" src="avatares/avatar-09.svg" alt="Anteojos"></button>
+        <button type="button" class="avatar-option" onclick="seleccionarAvatar('avatar-10')" data-avatar="avatar-10" aria-label="Elegir avatar Plateado" title="Plateado"><img class="avatar-img" src="avatares/avatar-10.svg" alt="Plateado"></button>
+        <button type="button" class="avatar-option" onclick="seleccionarAvatar('avatar-11')" data-avatar="avatar-11" aria-label="Elegir avatar Gorra" title="Gorra"><img class="avatar-img" src="avatares/avatar-11.svg" alt="Gorra"></button>
+        <button type="button" class="avatar-option" onclick="seleccionarAvatar('avatar-12')" data-avatar="avatar-12" aria-label="Elegir avatar Trenza" title="Trenza"><img class="avatar-img" src="avatares/avatar-12.svg" alt="Trenza"></button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Tu Biografía o Descripción</label>
+      <textarea id="editBio" placeholder="Escribí algo sobre vos y tus gustos cinematográficos..."></textarea>
+    </div>
+    <button class="btn solid" style="width:100%; padding:11px;" onclick="guardarPerfilEditado()">
+      Guardar Cambios
+    </button>
+  </div>
+</div>
+
+<!-- MODAL AGREGAR AMIGO -->
+<div class="overlay" id="modalAmigoOverlay" onclick="clickAmigoOverlay(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="cerrarModalAgregarAmigo()">×</button>
+    <div class="modal-logo">AGREGAR AMIGO</div>
+    <div class="modal-sub">Conectá con otros miembros de la comunidad</div>
+
+    <div class="field">
+      <label>Nombre de Usuario del Amigo</label>
+      <input type="text" id="inputNombreAmigo" placeholder="Ej. MartinCinefilo">
+    </div>
+    <button class="btn solid" style="width:100%; padding:11px;" onclick="agregarAmigo()">
+      Guardar Amigo
+    </button>
+  </div>
+</div>
+
+<!-- MODAL CHECKOUT -->
+<div class="overlay" id="checkoutOverlay" onclick="clickCheckoutOverlay(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="cerrarCheckoutModal()">×</button>
+    <div class="modal-logo">PASARELA DE PAGO</div>
+    <div class="modal-sub" id="checkoutSub">Suscripción al plan seleccionado</div>
+
+    <form id="formCheckout" onsubmit="procesarPago(event)">
+      <div class="field">
+        <label>Nombre en la tarjeta</label>
+        <input type="text" placeholder="Juan Pérez" required>
+      </div>
+      <div class="field">
+        <label>Número de Tarjeta</label>
+        <input type="text" placeholder="4532 •••• •••• 8892" maxlength="19" required>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <div class="field" style="flex: 1;">
+          <label>Vencimiento</label>
+          <input type="text" placeholder="MM/AA" maxlength="5" required>
+        </div>
+        <div class="field" style="flex: 1;">
+          <label>CVC</label>
+          <input type="password" placeholder="123" maxlength="4" required>
+        </div>
+      </div>
+      <button type="submit" class="btn solid" style="width:100%; padding:11px; margin-top: 6px;" id="btnPagar">
+        Confirmar y Pagar
+      </button>
+    </form>
+
+    <div class="modal-success" id="checkoutSuccess">
+      <span class="icon">🎉</span>
+      <h3>¡Suscripción Activada!</h3>
+      <p>Ya podés disfrutar de tus beneficios.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <p id="toastMsg">—</p>
+</div>
+
+<!-- MODAL TRAILER -->
+<div id="trailerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center; flex-direction:column; gap:12px; padding:16px;">
+  <div style="width:90%; max-width:800px; display:flex; justify-content:space-between; align-items:center;">
+    <a id="linkTrailerExterno" href="#" target="_blank" rel="noopener noreferrer" class="btn" style="padding:5px 12px; font-size:0.68rem;">Abrir en YouTube ↗</a>
+    <button onclick="cerrarTrailer()" style="background:none; border:none; color:#fff; font-size:22px; cursor:pointer;">✕ Cerrar</button>
+  </div>
+  <div style="position:relative; width:90%; max-width:800px; aspect-ratio:16/9; background:#141414; border:1px solid var(--border);">
+    <iframe id="iframeTrailer" style="width:100%; height:100%; border:none;" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</div>
+
+<script>
+  // GESTIÓN DE VISTAS (SPA)
+  function mostrarVista(vista) {
+    document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+    // "IA" lleva las dos letras en mayúscula en el HTML; tratamos ese caso aparte.
+    const nombreVista = vista === 'ia'
+      ? 'IA'
+      : vista.charAt(0).toUpperCase() + vista.slice(1);
+    const targetView = document.getElementById(`view${nombreVista}`);
+    const targetTab  = document.getElementById(`tabNav${nombreVista}`);
+
+    if (targetView) targetView.classList.add('active');
+    if (targetTab) targetTab.classList.add('active');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // CARRUSEL DE PORTADA (ARRANCA CON INTERSTELLAR)
+  const slidesCarrusel = [
+    {
+      tag: "Selección principal · Sci-Fi · 2014",
+      titulo: "INTERSTELLAR",
+      enfasis: "no miente.",
+      desc: "Explorá el catálogo, calificá producciones y descubrí recomendaciones con Inteligencia Artificial.",
+      bg: "https://image.tmdb.org/t/p/original/xJHokMbljvjADYdit5fK5VQsXEG.jpg",
+      trailer: "https://www.youtube.com/watch?v=zSWdZVtXT7E"
+    },
+    {
+      tag: "Épica visual · Sci-Fi · 2021",
+      titulo: "DUNE",
+      enfasis: "en Arrakis.",
+      desc: "Dunas infinitas, gusanos colosales y luchas de poder en el planeta más peligroso.",
+      bg: "https://image.tmdb.org/t/p/original/jYEW5xZkZk2WTrdbMGAPFuBqbDc.jpg",
+      trailer: "https://www.youtube.com/watch?v=n9xhJrPrl44"
+    },
+    {
+      tag: "Clásico moderno · Acción · 2008",
+      titulo: "THE DARK KNIGHT",
+      enfasis: "bajo fuego.",
+      desc: "Ciudad Gótica queda a merced del caos mientras Batman enfrenta su mayor prueba.",
+      bg: "https://image.tmdb.org/t/p/original/hkBaDkMWbLaf8B1lsWsKX7Ew3Xq.jpg",
+      trailer: "https://www.youtube.com/watch?v=EXeTwQWrcwY"
+    },
+    {
+      tag: "Obra maestra · Animación · 2001",
+      titulo: "SPIRITED AWAY",
+      enfasis: "encantada.",
+      desc: "Un mundo oculto de espíritus, casas de baños y magia más allá de lo real.",
+      bg: "https://image.tmdb.org/t/p/original/6oaILZmxCDenITquN5xrOFFGEDF.jpg",
+      trailer: "https://www.youtube.com/watch?v=ByXuk9QqQkk"
+    }
+  ];
+
+  let indiceCarrusel = 0;
+  let intervaloCarrusel;
+
+  function renderizarCarrusel() {
+    const track = document.getElementById('carouselTrack');
+    const dots  = document.getElementById('carouselDots');
+    if (!track || !dots) return;
+
+    track.innerHTML = slidesCarrusel.map((s) => `
+      <div class="carousel-slide">
+        <div class="carousel-bg" style="background-image: url('${s.bg}');"></div>
+        <div class="carousel-gradient"></div>
+        <div class="carousel-content">
+          <div class="hero-tag">${s.tag}</div>
+          <h1>${s.titulo} <em>${s.enfasis}</em></h1>
+          <p>${s.desc}</p>
+          <div class="carousel-actions">
+            <button class="btn solid" type="button" onclick="verVideo('${s.trailer}')">▶ Ver tráiler</button>
+            <button class="btn" type="button" onclick="mostrarVista('resenas')">Escribir reseña</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    dots.innerHTML = slidesCarrusel.map((_, idx) => `
+      <button class="carousel-dot ${idx === 0 ? 'active' : ''}" type="button" onclick="irASlide(${idx})" aria-label="Slide ${idx + 1}"></button>
+    `).join('');
+
+    actualizarCarrusel();
+    iniciarAutoCarrusel();
+  }
+
+  function actualizarCarrusel() {
+    const track = document.getElementById('carouselTrack');
+    const dots  = document.querySelectorAll('.carousel-dot');
+    if (!track) return;
+
+    track.style.transform = `translateX(-${indiceCarrusel * 100}%)`;
+    dots.forEach((dot, idx) => dot.classList.toggle('active', idx === indiceCarrusel));
+  }
+
+  function moverCarrusel(paso) {
+    indiceCarrusel = (indiceCarrusel + paso + slidesCarrusel.length) % slidesCarrusel.length;
+    actualizarCarrusel();
+    iniciarAutoCarrusel();
+  }
+
+  function irASlide(idx) {
+    indiceCarrusel = idx;
+    actualizarCarrusel();
+    iniciarAutoCarrusel();
+  }
+
+  function iniciarAutoCarrusel() {
+    clearInterval(intervaloCarrusel);
+    intervaloCarrusel = setInterval(() => {
+      indiceCarrusel = (indiceCarrusel + 1) % slidesCarrusel.length;
+      actualizarCarrusel();
+    }, 6000);
+  }
+
+  // CATÁLOGO DE 25 PELÍCULAS CON PÓSTERS OPERATIVOS
+  const peliculas = [
+    { titulo: "Parasite", año: 2019, genero: "Drama", score: 5, descripcion: "Tanto el paro como la precariedad laboral afectan a los miembros de la familia de Ki-taek.", plataformas: ["Netflix", "Max"], img: "https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg", trailer: "https://www.youtube.com/watch?v=5xH0HfJHsaY" },
+    { titulo: "Oldboy", año: 2003, genero: "Thriller", score: 4, descripcion: "Un hombre secuestrado durante 15 años es liberado y tiene 5 días para descubrir a su captor.", plataformas: ["Prime"], img: "https://image.tmdb.org/t/p/w500/pWDtjs568ZfOTMbURQBYuT4Qxka.jpg", trailer: "https://youtu.be/-W8cPij0HgA?si=WdDv2FOKl701ZYeI" },
+    { titulo: "Annihilation", año: 2018, genero: "Sci-Fi", score: 4, descripcion: "Una bióloga se une a una expedición hacia una zona anómala donde la naturaleza cambia.", plataformas: ["Netflix"], img: "https://image.tmdb.org/t/p/w500/d3qcpfNwbAMCNqWDHzPQsUYiUgS.jpg", trailer: "https://www.youtube.com/watch?v=89OP78l9oF0" },
+    { titulo: "The Lighthouse", año: 2019, genero: "Terror", score: 4, descripcion: "Dos encargados de un faro intentan mantener la cordura en una remota isla.", plataformas: ["Prime", "Apple"], img: "https://image.tmdb.org/t/p/w500/3nk9UoepYmv1G9oP18q6JJCeYwN.jpg", trailer: "https://www.youtube.com/watch?v=Hyag7lR8CPA" },
+    { titulo: "Interstellar", año: 2014, genero: "Sci-Fi", score: 5, descripcion: "Exploradores viajan a través de un agujero de gusano para salvar la humanidad.", plataformas: ["Max", "Prime"], img: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg", trailer: "https://www.youtube.com/watch?v=zSWdZVtXT7E" },
+    { titulo: "Whiplash", año: 2014, genero: "Drama", score: 5, descripcion: "Un baterista de jazz es guiado hacia la grandeza por un instructor impiadoso.", plataformas: ["Netflix", "Prime"], img: "https://image.tmdb.org/t/p/w500/7fn624j5lj3xTme2SgiLCeuedmO.jpg", trailer: "https://www.youtube.com/watch?v=7d_jQycdQGo" },
+    { titulo: "Pulp Fiction", año: 1994, genero: "Thriller", score: 5, descripcion: "Las historias de varios matones y criminales de Los Ángeles se entrelazan.", plataformas: ["Max"], img: "https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg", trailer: "https://www.youtube.com/watch?v=s7EdQ4FqbhY" },
+    { titulo: "The Dark Knight", año: 2008, genero: "Acción", score: 5, descripcion: "Batman enfrenta al caos desatado por el Joker en Ciudad Gótica.", plataformas: ["Max"], img: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg", trailer: "https://www.youtube.com/watch?v=EXeTwQWrcwY" },
+    { titulo: "Inception", año: 2010, genero: "Sci-Fi", score: 5, descripcion: "Un ladrón que roba secretos corporativos a través del uso de la tecnología de compartir sueños.", plataformas: ["Max", "Prime"], img: "https://image.tmdb.org/t/p/w500/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg", trailer: "https://www.youtube.com/watch?v=YoHD9XEInc0" },
+    { titulo: "Fight Club", año: 1999, genero: "Drama", score: 5, descripcion: "Un empleado de oficina insomne y un fabricante de jabón forman un club de pelea subterráneo.", plataformas: ["Disney"], img: "https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg", trailer: "https://www.youtube.com/watch?v=SUXWAEX2jlg" },
+    { titulo: "The Matrix", año: 1999, genero: "Sci-Fi", score: 5, descripcion: "Un hacker descubre la verdadera naturaleza de su realidad y su rol en la guerra contra sus controladores.", plataformas: ["Max"], img: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg", trailer: "https://www.youtube.com/watch?v=vKQi3bBA1y8" },
+    { titulo: "Spirited Away", año: 2001, genero: "Animación", score: 5, descripcion: "Una niña entra en un mundo gobernado por dioses, brujas y espíritus.", plataformas: ["Netflix"], img: "https://image.tmdb.org/t/p/w500/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg", trailer: "https://www.youtube.com/watch?v=ByXuk9QqQkk" },
+    { titulo: "Se7en", año: 1995, genero: "Thriller", score: 5, descripcion: "Dos detectives investigan una serie de asesinatos basados en los siete pecados capitales.", plataformas: ["Max"], img: "https://image.tmdb.org/t/p/w500/6yoghtyTpznpBik8EngEmJskVUO.jpg", trailer: "https://www.youtube.com/watch?v=znmZoVkCjpI" },
+    { titulo: "The Silence of the Lambs", año: 1991, genero: "Thriller", score: 5, descripcion: "Una joven agente del FBI busca la ayuda de un asesino en serie encarcelado.", plataformas: ["Prime"], img: "https://image.tmdb.org/t/p/w500/uS9m8OBk1A8eM9I042bx8XXpqAq.jpg", trailer: "https://youtu.be/6iB21hsprAQ?si=0NK64jTxPPlEAefN" },
+    { titulo: "Gladiator", año: 2000, genero: "Acción", score: 5, descripcion: "Un general romano traicionado busca venganza contra el corrupto emperador.", plataformas: ["Netflix", "Prime"], img: "https://image.tmdb.org/t/p/w500/ty8TGRuvJLPUmAR1H1nRIsgwvim.jpg", trailer: "https://youtu.be/P5ieIbInFpg?si=VXcLkWPm6G4PCeQQ" },
+    { titulo: "The Departed", año: 2006, genero: "Thriller", score: 4, descripcion: "Un policía encubierto y un topo en la policía intentan identificarse mutuamente.", plataformas: ["Max"], img: "https://image.tmdb.org/t/p/w500/nT97ifVT2J1yMQmeq20Qblg61T.jpg", trailer: "https://youtu.be/iojhqm0JTW4?si=rSlBi97Lgr93Eahk" },
+    { titulo: "The Prestige", año: 2006, genero: "Drama", score: 5, descripcion: "Dos ilusionistas rivales se obsesionan con crear el truco definitivo.", plataformas: ["Max"], img: "https://image.tmdb.org/t/p/w500/tRNlZbgNCNOpLpbPEz5L8G8A0JN.jpg", trailer: "https://www.youtube.com/watch?v=o4gHCmTQDVI" },
+    { titulo: "Memento", año: 2000, genero: "Thriller", score: 4, descripcion: "Un hombre con pérdida de memoria a corto plazo intenta encontrar al asesino de su esposa.", plataformas: ["Prime"], img: "https://image.tmdb.org/t/p/w500/yuNs09hvpHVU1cBTCAk9zxsL2oW.jpg", trailer: "https://youtu.be/mV9l1enMqvk?si=D2h5wDsYvRISxRZ2" },
+    { titulo: "Alien", año: 1979, genero: "Terror", score: 5, descripcion: "La tripulación de una nave comercial investiga una transmisión desconocida.", plataformas: ["Disney"], img: "https://image.tmdb.org/t/p/w500/vfrQk5IPloGg1v9Rzbh2Eg3VGyM.jpg", trailer: "https://www.youtube.com/watch?v=LjLamj-b0I8" },
+    { titulo: "Psycho", año: 1960, genero: "Terror", score: 5, descripcion: "Una secretaria en la fuga se hospeda en un remoto motel administrado por un joven obsesionado con su madre.", plataformas: ["Prime"], img: "https://image.tmdb.org/t/p/w500/yz4QVqPx3h1hD1DfqqQkCq3rmxW.jpg", trailer: "https://youtu.be/Wz719b9QUqY?si=w3oLdAH0GxJE9sXK" },
+    { titulo: "The Shining", año: 1980, genero: "Terror", score: 5, descripcion: "Un hombre cuida un hotel aislado durante el invierno y cae en la locura.", plataformas: ["Max"], img: "https://image.tmdb.org/t/p/w500/xazWoLealQwEgqZ89MLZklLZD3k.jpg", trailer: "https://youtu.be/IiSjPcRWjYA?si=a_MuKVhevvNYwR7F" },
+    { titulo: "Drive", año: 2011, genero: "Acción", score: 4, descripcion: "Un especialista de cine y conductor de huidas se mete en problemas por ayudar a su vecina.", plataformas: ["Prime"], img: "https://image.tmdb.org/t/p/w500/602vevIURmpDfzbnv5Ubi6wIkQm.jpg", trailer: "https://www.youtube.com/watch?v=KBiOF3y1W0Y" },
+    { titulo: "La La Land", año: 2016, genero: "Romance", score: 4, descripcion: "Una actriz y un músico de jazz se enamoran mientras persiguen sus sueños en Los Ángeles.", plataformas: ["Prime"], img: "https://image.tmdb.org/t/p/w500/uDO8zWDhfWwoFdKS4fzkUJt0Rf0.jpg", trailer: "https://www.youtube.com/watch?v=0pdqf4P9MB8" },
+    { titulo: "Dune", año: 2021, genero: "Sci-Fi", score: 5, descripcion: "Un joven talentoso debe viajar al planeta más peligroso del universo para asegurar el futuro de su familia.", plataformas: ["Max"], img: "https://image.tmdb.org/t/p/w500/d5NXSklXo0qyIYkgV94XAgMIckC.jpg", trailer: "https://youtu.be/TTgk_iT8Uts?si=PtJwZtyl6JtU7eJX" },
+    { titulo: "Arrival", año: 2016, genero: "Sci-Fi", score: 5, descripcion: "Una lingüista trabaja con el ejército para comunicarse con formas de vida extraterrestres.", plataformas: ["Netflix", "Prime"], img: "https://image.tmdb.org/t/p/w500/x2FJsf1ElAgr63Y3PNPtJrcmpoe.jpg", trailer: "https://www.youtube.com/watch?v=tFMo3UJ4B4g" },
+    { titulo: "Blade Runner 2049", año: 2017, genero: "Sci-Fi", score: 5, descripcion: "Un nuevo blade runner descubre un secreto enterrado hace tiempo que podría sumir a la sociedad en el caos.", plataformas: ["Max", "Prime"], img: "https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg", trailer: "https://www.youtube.com/watch?v=gCcx85zbxz4" },
+    { titulo: "No Country for Old Men", año: 2007, genero: "Thriller", score: 5, descripcion: "Un cazador encuentra un cargamento de heroína y dinero en el desierto y es perseguido por un asesino implacable.", plataformas: ["Prime", "Max"], img: "https://image.tmdb.org/t/p/w500/bj1v6YKF8yHQnjJj5tRTuWFPuSO.jpg", trailer: "https://www.youtube.com/watch?v=38A__WT3-o0" },
+    { titulo: "The Social Network", año: 2010, genero: "Drama", score: 4, descripcion: "La creación de Facebook y las disputas legales y personales que nacieron junto con el sitio.", plataformas: ["Max"], img: "https://image.tmdb.org/t/p/w500/n0ybibhJtQ5icDqTp8eRytcIHJx.jpg", trailer: "https://www.youtube.com/watch?v=lB95KLmpLR4" },
+    { titulo: "Mad Max: Fury Road", año: 2015, genero: "Acción", score: 5, descripcion: "En un yermo postapocalíptico, Max y Furiosa huyen a través del desierto en una persecución sin tregua.", plataformas: ["Max"], img: "https://image.tmdb.org/t/p/w500/hA2ple9q4qnwxp3hKVNhroipsir.jpg", trailer: "https://www.youtube.com/watch?v=hEJnMQG9ev8" },
+    { titulo: "Her", año: 2013, genero: "Romance", score: 4, descripcion: "Un escritor solitario desarrolla una relación profunda con un sistema operativo dotado de inteligencia artificial.", plataformas: ["Prime"], img: "https://image.tmdb.org/t/p/w500/eCOVztllj7AHbtpSv5nboWRo95M.jpg", trailer: "https://youtu.be/dJTU48_yghs?si=pqTV_geMUKBaGWCd" },
+    { titulo: "Prisoners", año: 2013, genero: "Thriller", score: 5, descripcion: "Cuando su hija y la amiga de esta desaparecen, un padre desesperado toma el caso en sus propias manos mientras la policía sigue una pista clave.", plataformas: ["Max", "Prime"], img: "https://image.tmdb.org/t/p/w500/jsS3O396LdF6a3B3z5X1x9o9W4D.jpg", trailer: "https://youtu.be/bpXfcTF6iVk?si=PJa2ctW54ZHkr6ND" },
+    { titulo: "There Will Be Blood", año: 2007, genero: "Drama", score: 5, descripcion: "A comienzos del siglo XX, un ambicioso buscador de petróleo asciende sin escrúpulos en el oeste estadounidense.", plataformas: ["Prime", "Max"], img: "https://image.tmdb.org/t/p/w500/fa0Tsq85pJbKIOveVFbPsPNMlbl.jpg", trailer: "https://youtu.be/FeSLPELpMeM?si=peOhUhOsNn4MDhXq" },
+    { titulo: "Eternal Sunshine of the Spotless Mind", año: 2004, genero: "Romance", score: 5, descripcion: "Tras una ruptura dolorosa, una pareja decide someterse a un procedimiento médico para borrar los recuerdos del otro.", plataformas: ["Prime"], img: "https://image.tmdb.org/t/p/w500/5MwkWH9tYHv3mV9OdKNR5zRe Western.jpg", trailer: "https://www.youtube.com/watch?v=07-QBnEkgXU" },
+    { titulo: "Spider-Man: Into the Spider-Verse", año: 2018, genero: "Animación", score: 5, descripcion: "Miles Morales se convierte en el Spider-Man de su realidad y debe unir fuerzas con versiones de otras dimensiones.", plataformas: ["Max", "Netflix"], img: "https://image.tmdb.org/t/p/w500/iiZZdoQBEYBv6id8su7ImL0oCbD.jpg", trailer: "https://youtu.be/g4Hbz2jLxvQ?si=CwnwaZySSJfC_IN_" },
+    { titulo: "Ex Machina", año: 2014, genero: "Sci-Fi", score: 4, descripcion: "Un joven programador es invitado a evaluar la inteligencia y humanidad de una androide avanzada en una casa aislada.", plataformas: ["Prime", "Apple"], img: "https://image.tmdb.org/t/p/w500/dmJE60B8x5j7s7V0E8K7x7gV5yA.jpg", trailer: "https://youtu.be/qSwobe3uIII?si=c-3Z0hpB9DVNIFPL" },
+    { titulo: "Get Out", año: 2017, genero: "Terror", score: 5, descripcion: "Un joven negro visita la finca de la familia de su pareja blanca y descubre un secreto inquietante detrás de su amabilidad.", plataformas: ["Prime", "Netflix"], img: "https://image.tmdb.org/t/p/w500/tFXcEccSQMf3lfhfXKSU9iRBpa3.jpg", trailer: "https://www.youtube.com/watch?v=DzfpyUB60YY" },
+    { titulo: "The Truman Show", año: 1998, genero: "Comedia", score: 5, descripcion: "Un hombre vive toda su vida dentro de un gigantesco set televisivo sin saber que cada segundo es transmitido al mundo.", plataformas: ["Prime", "Paramount"], img: "https://image.tmdb.org/t/p/w500/vuza0WqY239yBXOad8E60w3v4eM.jpg", trailer: "https://youtu.be/dlnmQbPGuls?si=oGyM_2Zh0DugWZrN" },
+    { titulo: "Nightcrawler", año: 2014, genero: "Thriller", score: 4, descripcion: "Un buscavidas nocturno se adentra en el mundo del periodismo criminal en Los Ángeles, cruzando cada vez más límites.", plataformas: ["Netflix", "Prime"], img: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg", trailer: "https://youtu.be/u1uP_8VJkDQ?si=v1K8D_1SEd8bc8wr" },
+    { titulo: "Princess Mononoke", año: 1997, genero: "Animación", score: 5, descripcion: "Un príncipe maldito viaja hacia el oeste y queda atrapado en el conflicto entre una ciudad minera y los espíritus del bosque.", plataformas: ["Netflix"], img: "https://image.tmdb.org/t/p/w500/jHWmNr7m5tuZMvyaY829j1x7v9g.jpg", trailer: "https://youtu.be/qh0Jx5xoqjI?si=P4EeLTsThnuk4InG" },
+    { titulo: "Goodfellas", año: 1990, genero: "Drama", score: 5, descripcion: "El ascenso y la caída de Henry Hill y su círculo cercano dentro de la mafia durante tres décadas.", plataformas: ["Max"], img: "https://image.tmdb.org/t/p/w500/aKuFiU82s5ISJpGZp7YkIr3kCUd.jpg", trailer: "https://youtu.be/2ilzidi_J8Q?si=IL9D3AngYAX_sULv" }
+  ];
+
+  function obtenerBadgesPlataformas(lista = []) {
+    return lista.map(p => {
+      const pLower = p.toLowerCase();
+      let clase = pLower.includes('netflix') ? 'netflix' : pLower.includes('prime') ? 'prime' : pLower.includes('max') ? 'max' : pLower.includes('disney') ? 'disney' : 'apple';
+      return `<span class="platform-badge ${clase}">📺 ${p}</span>`;
+    }).join(' ');
+  }
+
+  function obtenerYouTubeId(url) {
+    if (!url) return '';
+    const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);
+    return (match && match[2].length === 11) ? match[2] : null;
+  }
+function crearPosterFallback(titulo, genero = 'CINE') {
+    const seguroTitulo = String(titulo || 'Película').replace(/[<>&"]/g, '');
+    const seguroGenero = String(genero || 'CINE').replace(/[<>&"]/g, '').toUpperCase();
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="500" height="750" viewBox="0 0 500 750">
+        <rect width="500" height="750" fill="#202020"/>
+        <rect x="24" y="24" width="452" height="702" rx="12" fill="none" stroke="#c9a84c" stroke-opacity="0.45" stroke-width="2"/>
+        <text x="250" y="130" fill="#c9a84c" font-family="Arial, sans-serif" font-size="18" font-weight="bold" letter-spacing="4" text-anchor="middle">${seguroGenero}</text>
+        <line x1="120" y1="160" x2="380" y2="160" stroke="#383838" stroke-width="2"/>
+        <text x="250" y="360" fill="#f0ece3" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle">${seguroTitulo.slice(0, 22)}</text>
+        <text x="250" y="405" fill="#f0ece3" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle">${seguroTitulo.length > 22 ? seguroTitulo.slice(22, 44) : ''}</text>
+        <text x="250" y="650" fill="#a6a6a6" font-family="Arial, sans-serif" font-size="14" letter-spacing="3" text-anchor="middle">BAÚL DE PELÍCULAS</text>
+      </svg>
+    `.trim();
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
+  function renderizarPeliculas(lista = peliculas) {
+    const grid = document.getElementById('moviesGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    if (lista.length === 0) {
+      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 40px; border: 1px dashed var(--border);">No se encontraron películas.</div>`;
+      return;
+    }
+
+    lista.forEach(p => {
+      const estrellas = '<span style="color:var(--gold)">' + '★'.repeat(p.score) + '</span>';
+      const card = document.createElement('div');
+      card.className = 'movie-card';
+      card.innerHTML = `
+        <div class="movie-img-container">
+         <img src="${p.img}" alt="${p.titulo}" onerror="this.onerror=null; this.src=crearPosterFallback('${p.titulo.replace(/'/g, '')}', '${p.genero}');">
+          <button class="trailer-btn" type="button" onclick="verVideo('${p.trailer}')">▶</button>
+        </div>
+        <div class="movie-card-info">
+          <div class="movie-card-header">
+            <span class="movie-card-genre">${p.genero} · ${p.año}</span>
+            <div class="stars">${estrellas}</div>
+          </div>
+          <div class="movie-card-title">${p.titulo}</div>
+          <p class="movie-desc">${p.descripcion}</p>
+          <div class="platforms-container">${obtenerBadgesPlataformas(p.plataformas)}</div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  window.verVideo = function(url) {
+    const id = obtenerYouTubeId(url);
+    if (id) {
+      document.getElementById('iframeTrailer').src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+      document.getElementById('linkTrailerExterno').href = `https://www.youtube.com/watch?v=${id}`;
+      document.getElementById('trailerModal').style.display = 'flex';
+    }
+  };
+
+  window.cerrarTrailer = function() {
+    document.getElementById('iframeTrailer').src = '';
+    document.getElementById('trailerModal').style.display = 'none';
+  };
+
+  function filtrarPeliculas() {
+    const texto = document.getElementById('buscador').value.toLowerCase().trim();
+    renderizarPeliculas(peliculas.filter(p => p.titulo.toLowerCase().includes(texto) || p.genero.toLowerCase().includes(texto)));
+  }
+
+  // SUSCRIPCIÓN & PAGO
+  let planSeleccionado = null;
+
+  function seleccionarPlan(nombrePlan, precio) {
+    if (precio === 0) {
+      actualizarPlanUsuario(nombrePlan);
+      mostrarToast(`Usando el plan <b>${nombrePlan}</b>`);
+      return;
+    }
+    const sesion = JSON.parse(localStorage.getItem('sesionActiva') || 'null');
+    if (!sesion) {
+      mostrarToast('⚠ Debés iniciar sesión primero.');
+      abrirModal();
+      return;
+    }
+    planSeleccionado = { nombre: nombrePlan, precio };
+    document.getElementById('checkoutSub').textContent = `Suscripción a ${nombrePlan} - $${precio}/mes`;
+    document.getElementById('checkoutOverlay').classList.add('open');
+  }
+
+  function actualizarPlanUsuario(nuevoPlan) {
+    const sesion = JSON.parse(localStorage.getItem('sesionActiva') || 'null');
+    if (sesion) {
+      sesion.plan = nuevoPlan;
+      localStorage.setItem('sesionActiva', JSON.stringify(sesion));
+
+      const usuarios = JSON.parse(localStorage.getItem('usuarios') || '{}');
+      if (usuarios[sesion.email]) {
+        usuarios[sesion.email].plan = nuevoPlan;
+        localStorage.setItem('usuarios', JSON.stringify(usuarios));
+      }
+
+      document.getElementById('profilePlanBadge').textContent = `Plan ${nuevoPlan}`;
+    }
+  }
+
+  function cerrarCheckoutModal() {
+    document.getElementById('checkoutOverlay').classList.remove('open');
+    document.getElementById('checkoutSuccess').style.display = 'none';
+    document.getElementById('formCheckout').style.display = 'block';
+  }
+
+  function clickCheckoutOverlay(e) { if (e.target === document.getElementById('checkoutOverlay')) cerrarCheckoutModal(); }
+
+  function procesarPago(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnPagar');
+    btn.disabled = true;
+    btn.textContent = 'Procesando...';
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = 'Confirmar y Pagar';
+      document.getElementById('formCheckout').style.display = 'none';
+      document.getElementById('checkoutSuccess').style.display = 'block';
+      actualizarPlanUsuario(planSeleccionado.nombre);
+
+      setTimeout(() => {
+        cerrarCheckoutModal();
+        mostrarToast(`Suscrito con éxito a <b>${planSeleccionado.nombre}</b>`);
+      }, 1500);
+    }, 1200);
+  }
+
+  // RESEÑAS
+  let resenas = [];
+
+  function publicarResena() {
+    const sesion = JSON.parse(localStorage.getItem('sesionActiva') || 'null');
+    if (!sesion) {
+      mostrarToast('⚠ Debés iniciar sesión para publicar.');
+      abrirModal();
+      return;
+    }
+
+    const pelicula = document.getElementById('inputPelicula').value.trim();
+    const genero   = document.getElementById('inputGenero').value;
+    const resena   = document.getElementById('inputResena').value.trim();
+    const trailer  = document.getElementById('inputTrailer').value.trim();
+    const ratingEl = document.querySelector('input[name="rating"]:checked');
+
+    if (!pelicula || !ratingEl) { mostrarToast('⚠ Completá título y puntuación.'); return; }
+
+    const nueva = { id: Date.now(), pelicula, genero, resena, rating: parseInt(ratingEl.value), trailer };
+    resenas.push(nueva);
+    localStorage.setItem(`resenas_${sesion.email}`, JSON.stringify(resenas));
+
+    renderizarListasResenas();
+    actualizarEstadisticasPerfil();
+    mostrarToast(`<b>${pelicula}</b> publicada`);
+
+    document.getElementById('inputPelicula').value = '';
+    document.getElementById('inputResena').value = '';
+    document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false);
+  }
+
+  function renderizarListasResenas() {
+    const contenedorPrincipal = document.getElementById('listaResenas');
+    const contenedorPerfil    = document.getElementById('listaResenasPerfil');
+
+    const htmlContent = resenas.length === 0
+      ? '<div class="empty-msg">No hay reseñas guardadas.</div>'
+      : resenas.map(r => `
+        <div class="review-item">
+          <div class="review-author">
+            <img class="review-author-avatar" src="avatares/${obtenerAvatarActivo()}.svg" alt="Tu avatar">
+            <span>Tu reseña</span>
+          </div>
+          <div class="review-row">
+            <div class="review-title">${r.pelicula}</div>
+            <div>
+              <span style="color:var(--gold); font-size:0.8rem;">${'★'.repeat(r.rating)}</span>
+              <button class="delete-review-btn" onclick="eliminarResena(${r.id})">✕</button>
+            </div>
+          </div>
+          <div class="review-genre">${r.genero || 'General'}</div>
+          <div class="review-text">${r.resena || 'Sin texto.'}</div>
+        </div>
+      `).join('');
+
+    if (contenedorPrincipal) contenedorPrincipal.innerHTML = htmlContent;
+    if (contenedorPerfil)    contenedorPerfil.innerHTML    = htmlContent;
+  }
+
+  function eliminarResena(id) {
+    const sesion = JSON.parse(localStorage.getItem('sesionActiva') || 'null');
+    if (!sesion) return;
+
+    resenas = resenas.filter(r => r.id !== id);
+    localStorage.setItem(`resenas_${sesion.email}`, JSON.stringify(resenas));
+
+    renderizarListasResenas();
+    actualizarEstadisticasPerfil();
+    mostrarToast('Reseña eliminada.');
+  }
+
+  function actualizarEstadisticasPerfil() {
+    document.getElementById('statTotalResenas').textContent = resenas.length;
+    if (resenas.length === 0) {
+      document.getElementById('statPromedioPuntuacion').textContent = '0.0';
+      return;
+    }
+    const promedio = (resenas.reduce((a, b) => a + b.rating, 0) / resenas.length).toFixed(1);
+    document.getElementById('statPromedioPuntuacion').textContent = promedio;
+  }
+
+
+  const OPENROUTER_API_KEY = '    '; // <--- PONÉ TU CLAVE AQUÍ
+
+
+  const historialIA = [];
+
+  function obtenerContextoResenas() {
+    if (!resenas || resenas.length === 0) return 'Este usuario todavía no publicó reseñas.';
+    return resenas.map(r => `- Película: ${r.pelicula}; género: ${r.genero || 'No indicado'}; puntuación: ${r.rating}/5; comentario: ${r.resena || r.texto || r.comentario || 'Sin comentario escrito'}`).join('\n');
+  }
+function limpiarFormatoIA(texto) {
+  return texto
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/^#{1,6}\s*/gm, '');
+}
+  function agregarMensajeIA(autor, texto) {
+    const contenedor = document.getElementById('mensajesIA');
+    const mensaje = document.createElement('p');
+    mensaje.style.margin = '0 0 12px';
+    const etiqueta = document.createElement('strong');
+    etiqueta.style.color = 'var(--gold)';
+    etiqueta.textContent = autor + ': ';
+    mensaje.appendChild(etiqueta);
+   mensaje.appendChild(document.createTextNode(limpiarFormatoIA(texto)));
+    contenedor.appendChild(mensaje);
+    contenedor.scrollTop = contenedor.scrollHeight;
+  }
+
+  async function consultarOpenRouter(mensajes) {
+    const instrucciones = mensajes.find(m => m.role === 'system')?.content || '';
+
+    const historial = mensajes
+      .filter(m => m.role !== 'system')
+      .map(m => {
+        const autor = m.role === 'assistant' ? 'Asistente' : 'Usuario';
+        return autor + ': ' + m.content;
+      })
+      .join('\n\n');
+
+    const respuesta = await fetch(
+      'https://openrouter.ai/api/v1/responses',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + OPENROUTER_API_KEY,
+          'X-Title': 'Baúl de películas'
+        },
+        body: JSON.stringify({
+          model: 'openrouter/free',
+          instructions: instrucciones,
+          input: historial,
+          max_output_tokens: 4000,
+          reasoning: {
+            effort: 'low'
+          }
+        })
+      }
+    );
+
+    const datos = await respuesta.json().catch(() => ({}));
+
+    if (!respuesta.ok || datos.error) {
+      throw new Error(
+        datos.error?.message || 'Error HTTP ' + respuesta.status
+      );
+    }
+
+    const textos = (datos.output || [])
+      .filter(item => item.type === 'message')
+      .flatMap(item => item.content || [])
+      .filter(parte => parte.type === 'output_text')
+      .map(parte => parte.text);
+
+    const resultado = (textos.join('\n').trim() || datos.output_text || '').trim();
+
+    if (!resultado) {
+      throw new Error(
+        'La consulta terminó sin texto. Estado: ' +
+        (datos.status || 'desconocido')
+      );
+    }
+
+    return resultado;
+}
+  async function enviarMensajeIA(texto) {
+    if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY === '') 
+    {
+      agregarMensajeIA('Aviso', 'Todavía falta configurar la clave de OpenRouter en el código.');
+      return;
+    }
+
+    const boton = document.getElementById('btnEnviarIA');
+    const entrada = document.getElementById('entradaIA');
+    boton.disabled = true;
+    entrada.disabled = true;
+
+    
+    agregarMensajeIA('Vos', texto);
+    const espera = document.createElement('p');
+    espera.id = 'esperaIA';
+    espera.className = 'thinking';
+    espera.textContent = 'La IA está pensando...';
+    document.getElementById('mensajesIA').appendChild(espera);
+
+    const contexto = obtenerContextoResenas();
+    const mensajes = [
+      {
+        role: 'system',
+        content: `Sos un asistente experto en cine y trabajás para Baúl de Películas.
+
+    PERSONALIDAD Y FORMA DE HABLAR:
+    - Respondé siempre en español argentino natural.
+    - Utilizá ortografía y gramática correctas.
+    - Podes poner emojis si crees que agregan valor.
+    - Podes oponer la palabra "pelis" a "películas" en contextos informales.
+    - Construí oraciones completas y fáciles de entender.
+    - Nunca dejes frases sin terminar.
+    - No inventes palabras ni escribas de manera apresurada.
+    - Mantené un tono amable, cercano y profesional.
+    - Revisá que tu respuesta esté completa antes de enviarla.
+    - No uses formato Markdown, asteriscos (* o ) ni numerales (###). Escribí todo en texto plano
+
+    SOBRE LAS RECOMENDACIONES:
+    - Analizá las reseñas y puntuaciones del usuario.
+    - Identificá sus géneros y estilos cinematográficos favoritos.
+    - No recomiendes películas que ya haya reseñado.
+    - Explicá por qué cada recomendación coincide con sus gustos.
+    - No inventes información sobre películas.
+
+    Reseñas del usuario:
+    ${contexto}`
+      },
+      { role: 'user', content: texto }
+    ];
+
+    try {
+      const contestacion = await consultarOpenRouter(mensajes);
+      document.getElementById('esperaIA')?.remove();
+      agregarMensajeIA('IA', limpiarFormatoIA(contestacion));
+      historialIA.push({ role: 'user', content: texto }, { role: 'assistant', content: limpiarFormatoIA(contestacion) });
+    } catch (error) {
+      document.getElementById('esperaIA')?.remove();
+      agregarMensajeIA('Aviso', 'OpenRouter no pudo completar la consulta. ' + error.message + '. Probá nuevamente en un momento.');
+    } finally {
+      boton.disabled = false;
+      entrada.disabled = false;
+      entrada.value = '';
+      entrada.focus();
+    }
+  }
+
+  document.getElementById('formularioIA').addEventListener('submit', function(evento) {
+    evento.preventDefault();
+    const texto = document.getElementById('entradaIA').value.trim();
+    if (texto) enviarMensajeIA(texto);
+  });
+
+  async function pedirRecomendaciones() {
+    if (!resenas || resenas.length === 0) {
+      mostrarToast('⚠ Publicá al menos una reseña para recibir recomendaciones personalizadas.');
+      return;
+    }
+    enviarMensajeIA('Analizá mis reseñas y recomendame 5 películas que todavía no haya reseñado. Para cada una, explicá brevemente por qué podría gustarme según mis puntuaciones y comentarios.');
+  }
+
+  // AVATARES ILUSTRADOS Y EDICIÓN DEL PERFIL
+  const AVATARES_PERFIL = [
+    { id: 'avatar-01', nombre: 'Cinéfilo clásico' },
+    { id: 'avatar-02', nombre: 'Melena oscura' },
+    { id: 'avatar-03', nombre: 'Pelirroja' },
+    { id: 'avatar-04', nombre: 'Rulos' },
+    { id: 'avatar-05', nombre: 'Auriculares' },
+    { id: 'avatar-06', nombre: 'Rubio' },
+    { id: 'avatar-07', nombre: 'Afro' },
+    { id: 'avatar-08', nombre: 'Gorro' },
+    { id: 'avatar-09', nombre: 'Anteojos' },
+    { id: 'avatar-10', nombre: 'Plateado' },
+    { id: 'avatar-11', nombre: 'Gorra' },
+    { id: 'avatar-12', nombre: 'Trenza' }
+  ];
+
+  let avatarSeleccionado = 'avatar-01';
+
+  function normalizarAvatar(valor) {
+    return AVATARES_PERFIL.some(avatar => avatar.id === valor)
+      ? valor
+      : 'avatar-01';
+  }
+
+  function obtenerAvatarActivo() {
+    const sesion = JSON.parse(localStorage.getItem('sesionActiva') || 'null');
+    if (!sesion) return 'avatar-01';
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '{}');
+    return normalizarAvatar((usuarios[sesion.email] || {}).foto);
+  }
+
+  function seleccionarAvatar(idAvatar) {
+    avatarSeleccionado = normalizarAvatar(idAvatar);
+    document.querySelectorAll('.avatar-option').forEach(el => {
+      el.classList.toggle('selected', el.getAttribute('data-avatar') === avatarSeleccionado);
+    });
+  }
+
+  function abrirModalEditarPerfil() {
+    const sesion = JSON.parse(localStorage.getItem('sesionActiva') || 'null');
+    if (!sesion) return;
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '{}');
+    const u = usuarios[sesion.email] || {};
+
+    avatarSeleccionado = normalizarAvatar(u.foto);
+    document.getElementById('editBio').value = u.bio || '';
+
+    document.querySelectorAll('.avatar-option').forEach(el => {
+      el.classList.toggle('selected', el.getAttribute('data-avatar') === avatarSeleccionado);
+    });
+
+    document.getElementById('modalEditarPerfilOverlay').classList.add('open');
+  }
+
+  function cerrarModalEditarPerfil() {
+    document.getElementById('modalEditarPerfilOverlay').classList.remove('open');
+  }
+
+  function clickEditarPerfilOverlay(e) {
+    if (e.target === document.getElementById('modalEditarPerfilOverlay')) cerrarModalEditarPerfil();
+  }
+
+  function guardarPerfilEditado() {
+    const sesion = JSON.parse(localStorage.getItem('sesionActiva') || 'null');
+    if (!sesion) return;
+
+    const bio = document.getElementById('editBio').value.trim();
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '{}');
+    if (usuarios[sesion.email]) {
+      usuarios[sesion.email].foto = avatarSeleccionado;
+      usuarios[sesion.email].bio = bio;
+      localStorage.setItem('usuarios', JSON.stringify(usuarios));
+    }
+
+    const avatarPerfil = document.getElementById('profileAvatar');
+    if (avatarPerfil) {
+      avatarPerfil.innerHTML = `<img class="avatar-img" src="avatares/${avatarSeleccionado}.svg" alt="Avatar de perfil">`;
+    }
+
+    const avatarNav = document.querySelector('#navUsuario .nav-avatar');
+    if (avatarNav) avatarNav.src = `avatares/${avatarSeleccionado}.svg`;
+
+    cerrarModalEditarPerfil();
+    cargarDatosPerfilUsuario(sesion.email);
+    renderizarListasResenas();
+    mostrarToast('¡Tu perfil fue actualizado!');
+  }
+
+  // AMIGOS
+  function abrirModalAgregarAmigo() {
+    document.getElementById('inputNombreAmigo').value = '';
+    document.getElementById('modalAmigoOverlay').classList.add('open');
+  }
+
+  function cerrarModalAgregarAmigo() {
+    document.getElementById('modalAmigoOverlay').classList.remove('open');
+  }
+
+  function clickAmigoOverlay(e) {
+    if (e.target === document.getElementById('modalAmigoOverlay')) cerrarModalAgregarAmigo();
+  }
+
+  function agregarAmigo() {
+    const sesion = JSON.parse(localStorage.getItem('sesionActiva') || 'null');
+    if (!sesion) return;
+
+    const nombre = document.getElementById('inputNombreAmigo').value.trim();
+    if (!nombre) { mostrarToast('⚠ Ingresá el nombre del amigo.'); return; }
+
+    const avataresAmigos = AVATARES_PERFIL.map(avatar => avatar.id);
+    const avatarAleatorio = avataresAmigos[Math.floor(Math.random() * avataresAmigos.length)];
+
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '{}');
+    const u = usuarios[sesion.email] || {};
+    if (!u.amigos) u.amigos = [];
+
+    u.amigos.push({ id: Date.now(), nombre, foto: avatarAleatorio });
+    usuarios[sesion.email] = u;
+    localStorage.setItem('usuarios', JSON.stringify(usuarios));
+
+    cerrarModalAgregarAmigo();
+    renderizarAmigos(u.amigos);
+    mostrarToast(`<b>${nombre}</b> agregado a tus amigos.`);
+  }
+
+  function eliminarAmigo(id) {
+    const sesion = JSON.parse(localStorage.getItem('sesionActiva') || 'null');
+    if (!sesion) return;
+
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '{}');
+    const u = usuarios[sesion.email] || {};
+    if (u.amigos) {
+      u.amigos = u.amigos.filter(a => a.id !== id);
+      usuarios[sesion.email] = u;
+      localStorage.setItem('usuarios', JSON.stringify(usuarios));
+      renderizarAmigos(u.amigos);
+      mostrarToast('Amigo eliminado.');
+    }
+  }
+
+  function renderizarAmigos(listaAmigos = []) {
+    const contenedor = document.getElementById('listaAmigos');
+    document.getElementById('statTotalAmigos').textContent = listaAmigos.length;
+
+    if (listaAmigos.length === 0) {
+      contenedor.innerHTML = `<div class="empty-msg" style="grid-column: 1 / -1; margin-top: 10px;">Todavía no agregaste amigos a tu lista.</div>`;
+      return;
+    }
+
+    contenedor.innerHTML = listaAmigos.map(a => `
+      <div class="friend-card">
+        <div class="friend-info">
+          <div class="friend-avatar"><img class="friend-avatar-img" src="avatares/${normalizarAvatar(a.foto)}.svg" alt="Avatar de ${a.nombre}"></div>
+          <div class="friend-name">${a.nombre}</div>
+        </div>
+        <button class="btn-remove-friend" onclick="eliminarAmigo(${a.id})">✕</button>
+      </div>
+    `).join('');
+  }
+
+  // LOGIN & AUTH
+  function abrirModal() { document.getElementById('overlay').classList.add('open'); }
+  function cerrarModal() { document.getElementById('overlay').classList.remove('open'); }
+  function clickOverlay(e) { if (e.target === document.getElementById('overlay')) cerrarModal(); }
+
+  function cambiarTab(tab) {
+    document.querySelectorAll('.tab').forEach((b, i) => b.classList.toggle('active', (i===0 && tab==='registro') || (i===1 && tab==='login')));
+    document.getElementById('tab-registro').classList.toggle('active', tab==='registro');
+    document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  }
+
+  function registrar() {
+    const usuario = document.getElementById('regUsuario').value.trim();
+    const email   = document.getElementById('regEmail').value.trim();
+    const pass    = document.getElementById('regPass').value;
+
+    if (!usuario || !email || !pass) { mostrarToast('⚠ Completá todos los campos.'); return; }
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '{}');
+    if (usuarios[email]) { mostrarToast('⚠ El email ya existe.'); return; }
+
+    usuarios[email] = { usuario, email, pass, plan: 'Básico', foto: 'avatar-01', bio: '', amigos: [] };
+    localStorage.setItem('usuarios', JSON.stringify(usuarios));
+    iniciarSesionConUsuario(usuario, email, 'Básico');
+    cerrarModal();
+  }
+
+  function iniciarSesion() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass  = document.getElementById('loginPass').value;
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '{}');
+
+    if (!usuarios[email] || usuarios[email].pass !== pass) { mostrarToast('⚠ Datos incorrectos.'); return; }
+
+    iniciarSesionConUsuario(usuarios[email].usuario, email, usuarios[email].plan || 'Básico');
+    cerrarModal();
+  }
+
+  function iniciarSesionConUsuario(nombre, email, plan = 'Básico') {
+    const sesion = JSON.parse(localStorage.getItem('sesionActiva') || 'null');
+    const planActual = sesion ? (sesion.plan || plan) : plan;
+
+    localStorage.setItem('sesionActiva', JSON.stringify({ nombre, email, plan: planActual }));
+
+    const usuariosNav = JSON.parse(localStorage.getItem('usuarios') || '{}');
+    const avatarNav = normalizarAvatar((usuariosNav[email] || {}).foto);
+    document.getElementById('navUsuario').innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span onclick="mostrarVista('perfil')" style="display:flex; align-items:center; font-size:0.75rem; color:var(--gold); cursor:pointer;">
+          <img class="nav-avatar" src="avatares/${avatarNav}.svg" alt="">
+          ★ ${nombre}
+        </span>
+        <button class="btn" style="padding:3px 8px; font-size:0.6rem;" onclick="cerrarSesion()">Salir</button>
+      </div>
+    `;
+
+    document.getElementById('tabNavPerfil').style.display = 'inline-block';
+    cargarDatosPerfilUsuario(email);
+
+    resenas = JSON.parse(localStorage.getItem(`resenas_${email}`) || '[]');
+    renderizarListasResenas();
+    actualizarEstadisticasPerfil();
+  }
+
+  function cargarDatosPerfilUsuario(email) {
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '{}');
+    const u = usuarios[email] || {};
+
+    document.getElementById('profileNombre').textContent = u.usuario || 'Usuario';
+    document.getElementById('profileEmail').textContent = email;
+    document.getElementById('profileBio').textContent = u.bio || 'Sin descripción todavía. ¡Editar perfil para escribir algo!';
+    document.getElementById('profilePlanBadge').textContent = `Plan ${u.plan || 'Básico'}`;
+
+    const avatarBox = document.getElementById('profileAvatar');
+    avatarBox.innerHTML = `<img class="avatar-img" src="avatares/${normalizarAvatar(u.foto)}.svg" alt="Avatar de perfil">`;
+
+    renderizarAmigos(u.amigos || []);
+  }
+
+  function cerrarSesion() {
+    localStorage.removeItem('sesionActiva');
+    document.getElementById('navUsuario').innerHTML = `<button class="btn" onclick="abrirModal()">Registrarse</button>`;
+    document.getElementById('tabNavPerfil').style.display = 'none';
+    resenas = [];
+    renderizarListasResenas();
+    mostrarVista('peliculas');
+  }
+
+  let toastTimer;
+  function mostrarToast(msj) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toastMsg').innerHTML = msj;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderizarCarrusel();
+    renderizarPeliculas();
+    const sesion = JSON.parse(localStorage.getItem('sesionActiva') || 'null');
+    if (sesion) iniciarSesionConUsuario(sesion.nombre, sesion.email, sesion.plan);
+  });
+</script>
+
+</body>
+</html>
