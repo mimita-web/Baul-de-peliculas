@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 110" role="img" aria-label="Plateado">
+    <defs><clipPath id="clip"><circle cx="55" cy="55" r="53"/></clipPath><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#343e50"/><stop offset="1" stop-color="#151515"/></linearGradient></defs>
+    <g clip-path="url(#clip)">
+      <rect width="110" height="110" fill="url(#bg)"/>
+      <circle cx="84" cy="20" r="22" fill="#ffffff" opacity=".035"/>
+      
+      <path d="M12 119 Q14 93 34 87 L44 82 Q54 91 65 82 L76 87 Q96 94 98 119Z" fill="#354458"/>
+      <path d="M42 84 Q53 96 66 84 L71 91 Q56 105 37 91Z" fill="#f0d6be" opacity=".22"/>
+    
+      <path d="M24 60 Q19 27 37 15 Q58 2 78 19 Q91 33 83 65 L76 89 L69 55 L31 57 L25 91Z" fill="#b9b7b0"/>
+      
+      <path d="M44 68 L44 83 Q54 91 65 82 L63 66Z" fill="#f1c9a5"/>
+      <ellipse cx="26" cy="54" rx="6" ry="10" fill="#f1c9a5"/>
+      <ellipse cx="82" cy="54" rx="6" ry="10" fill="#f1c9a5"/>
+      <ellipse cx="54" cy="51" rx="29" ry="35" fill="#f1c9a5"/>
+      <path d="M40 50 Q44 46 49 50" fill="none" stroke="#4a3029" stroke-width="2.3" stroke-linecap="round"/>
+      <path d="M61 50 Q66 46 70 50" fill="none" stroke="#4a3029" stroke-width="2.3" stroke-linecap="round"/>
+      <ellipse cx="45" cy="55" rx="2.4" ry="3.2" fill="#201a18"/>
+      <ellipse cx="66" cy="55" rx="2.4" ry="3.2" fill="#201a18"/>
+      <path d="M54 55 Q51 63 55 64" fill="none" stroke="#bd806b" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M47 72 Q55 78 63 71" fill="none" stroke="#934f4a" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="37" cy="64" rx="5" ry="2.5" fill="#d9786c" opacity=".22"/>
+      <ellipse cx="72" cy="64" rx="5" ry="2.5" fill="#d9786c" opacity=".22"/>
+    
+      <path d="M22 41 Q25 12 50 10 Q72 6 88 24 Q77 28 69 29 Q52 35 45 31 Q34 41 22 45Z" fill="#b9b7b0"/>
+      
+    </g>
+    <circle cx="55" cy="55" r="52.5" fill="none" stroke="#c9a84c" stroke-width="2.5"/>
+    </svg>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 110" role="img" aria-label="Auriculares">
+    <defs><clipPath id="clip"><circle cx="55" cy="55" r="53"/></clipPath><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#263744"/><stop offset="1" stop-color="#151515"/></linearGradient></defs>
+    <g clip-path="url(#clip)">
+      <rect width="110" height="110" fill="url(#bg)"/>
+      <circle cx="84" cy="20" r="22" fill="#ffffff" opacity=".035"/>
+      
+      <path d="M12 119 Q14 93 34 87 L44 82 Q54 91 65 82 L76 87 Q96 94 98 119Z" fill="#283e50"/>
+      <path d="M42 84 Q53 96 66 84 L71 91 Q56 105 37 91Z" fill="#f0d6be" opacity=".22"/>
+    
+      <path d="M22 65 Q12 30 31 14 Q47 0 67 9 Q93 20 89 56 L91 107 L73 112 L70 58 L31 58 L28 111 L10 105Z" fill="#171b28"/>
+      
+      <path d="M44 68 L44 83 Q54 91 65 82 L63 66Z" fill="#e6b18c"/>
+      <ellipse cx="26" cy="54" rx="6" ry="10" fill="#e6b18c"/>
+      <ellipse cx="82" cy="54" rx="6" ry="10" fill="#e6b18c"/>
+      <ellipse cx="54" cy="51" rx="29" ry="35" fill="#e6b18c"/>
+      <path d="M40 50 Q44 46 49 50" fill="none" stroke="#4a3029" stroke-width="2.3" stroke-linecap="round"/>
+      <path d="M61 50 Q66 46 70 50" fill="none" stroke="#4a3029" stroke-width="2.3" stroke-linecap="round"/>
+      <ellipse cx="45" cy="55" rx="2.4" ry="3.2" fill="#201a18"/>
+      <ellipse cx="66" cy="55" rx="2.4" ry="3.2" fill="#201a18"/>
+      <path d="M54 55 Q51 63 55 64" fill="none" stroke="#bd806b" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M47 72 Q55 78 63 71" fill="none" stroke="#934f4a" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="37" cy="64" rx="5" ry="2.5" fill="#d9786c" opacity=".22"/>
+      <ellipse cx="72" cy="64" rx="5" ry="2.5" fill="#d9786c" opacity=".22"/>
+    
+      <path d="M23 44 Q20 16 44 10 Q71 1 86 26 Q76 25 68 32 Q55 40 44 29 Q35 40 23 44Z" fill="#171b28"/>
+      <path d="M23 55 Q18 15 54 14 Q90 15 85 55" fill="none" stroke="#9aa7b7" stroke-width="7"/><rect x="18" y="48" width="11" height="23" rx="5" fill="#75889b"/><rect x="79" y="48" width="11" height="23" rx="5" fill="#75889b"/>
+    </g>
+    <circle cx="55" cy="55" r="52.5" fill="none" stroke="#c9a84c" stroke-width="2.5"/>
+    </svg>
