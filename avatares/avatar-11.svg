@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 110" role="img" aria-label="Gorra">
+    <defs><clipPath id="clip"><circle cx="55" cy="55" r="53"/></clipPath><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#49352d"/><stop offset="1" stop-color="#151515"/></linearGradient></defs>
+    <g clip-path="url(#clip)">
+      <rect width="110" height="110" fill="url(#bg)"/>
+      <circle cx="84" cy="20" r="22" fill="#ffffff" opacity=".035"/>
+      
+      <path d="M12 119 Q14 93 34 87 L44 82 Q54 91 65 82 L76 87 Q96 94 98 119Z" fill="#583b32"/>
+      <path d="M42 84 Q53 96 66 84 L71 91 Q56 105 37 91Z" fill="#f0d6be" opacity=".22"/>
+    
+      <path d="M25 58 Q17 27 37 15 Q60 3 78 22 Q88 36 82 63 L75 88 L67 53 L32 57 L27 87Z" fill="#2b201c"/>
+      
+      <path d="M44 68 L44 83 Q54 91 65 82 L63 66Z" fill="#c78665"/>
+      <ellipse cx="26" cy="54" rx="6" ry="10" fill="#c78665"/>
+      <ellipse cx="82" cy="54" rx="6" ry="10" fill="#c78665"/>
+      <ellipse cx="54" cy="51" rx="29" ry="35" fill="#c78665"/>
+      <path d="M40 50 Q44 46 49 50" fill="none" stroke="#4a3029" stroke-width="2.3" stroke-linecap="round"/>
+      <path d="M61 50 Q66 46 70 50" fill="none" stroke="#4a3029" stroke-width="2.3" stroke-linecap="round"/>
+      <ellipse cx="45" cy="55" rx="2.4" ry="3.2" fill="#201a18"/>
+      <ellipse cx="66" cy="55" rx="2.4" ry="3.2" fill="#201a18"/>
+      <path d="M54 55 Q51 63 55 64" fill="none" stroke="#bd806b" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M47 72 Q55 78 63 71" fill="none" stroke="#934f4a" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="37" cy="64" rx="5" ry="2.5" fill="#d9786c" opacity=".22"/>
+      <ellipse cx="72" cy="64" rx="5" ry="2.5" fill="#d9786c" opacity=".22"/>
+    
+      <path d="M20 34 Q25 12 55 12 Q78 14 84 34 Q55 31 20 42Z" fill="#34434f"/><path d="M47 31 Q75 28 94 43 Q78 48 52 40Z" fill="#465866"/>
+      
+    </g>
+    <circle cx="55" cy="55" r="52.5" fill="none" stroke="#c9a84c" stroke-width="2.5"/>
+    </svg>
