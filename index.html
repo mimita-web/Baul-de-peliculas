@@ -1401,6 +1401,13 @@ function crearPosterFallback(titulo, genero = 'CINE') {
 
   const historialIA = [];
 
+  function limpiarChatIA() {
+    historialIA.length = 0;
+    document.getElementById('mensajesIA').innerHTML = '<p style="margin:0;">¡Hola! Soy tu asistente de cine. Podés preguntarme qué película ver, pedirme recomendaciones o contarme qué tipo de historias te gustan. También puedo tener en cuenta tus reseñas.</p>';
+    document.getElementById('entradaIA').value = '';
+    document.getElementById('entradaIA').focus();
+  }
+
   function obtenerContextoResenas() {
     if (!resenas || resenas.length === 0) return 'Este usuario todavía no publicó reseñas.';
     return resenas.map(r => `- Película: ${r.pelicula}; género: ${r.genero || 'No indicado'}; puntuación: ${r.rating}/5; comentario: ${r.resena || r.texto || r.comentario || 'Sin comentario escrito'}`).join('\n');
@@ -1786,3 +1793,4 @@ async function consultarOpenRouter(mensajes) {
 
 </body>
 </html>
+
