@@ -1399,9 +1399,6 @@ function crearPosterFallback(titulo, genero = 'CINE') {
   }
 
 
-  const OPENROUTER_API_KEY = '    '; // <--- PONÉ TU CLAVE AQUÍ
-
-
   const historialIA = [];
 
   function obtenerContextoResenas() {
@@ -1427,70 +1424,28 @@ function limpiarFormatoIA(texto) {
     contenedor.scrollTop = contenedor.scrollHeight;
   }
 
-  async function consultarOpenRouter(mensajes) {
-    const instrucciones = mensajes.find(m => m.role === 'system')?.content || '';
+const WORKER_URL = "https://mimita.ovelarmile2509.workers.dev/";
 
-    const historial = mensajes
-      .filter(m => m.role !== 'system')
-      .map(m => {
-        const autor = m.role === 'assistant' ? 'Asistente' : 'Usuario';
-        return autor + ': ' + m.content;
-      })
-      .join('\n\n');
+async function consultarOpenRouter(mensajes) {
+  const respuesta = await fetch(WORKER_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: mensajes })
+  });
 
-    const respuesta = await fetch(
-      'https://openrouter.ai/api/v1/responses',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + OPENROUTER_API_KEY,
-          'X-Title': 'Baúl de películas'
-        },
-        body: JSON.stringify({
-          model: 'openrouter/free',
-          instructions: instrucciones,
-          input: historial,
-          max_output_tokens: 4000,
-          reasoning: {
-            effort: 'low'
-          }
-        })
-      }
-    );
+  const datos = await respuesta.json().catch(() => ({}));
 
-    const datos = await respuesta.json().catch(() => ({}));
+  if (!respuesta.ok || datos.error) {
+    throw new Error(datos.error || `Error HTTP ${respuesta.status}`);
+  }
 
-    if (!respuesta.ok || datos.error) {
-      throw new Error(
-        datos.error?.message || 'Error HTTP ' + respuesta.status
-      );
-    }
+  const texto = (datos.text || "").trim();
+  if (!texto) throw new Error("La consulta terminó sin texto.");
 
-    const textos = (datos.output || [])
-      .filter(item => item.type === 'message')
-      .flatMap(item => item.content || [])
-      .filter(parte => parte.type === 'output_text')
-      .map(parte => parte.text);
-
-    const resultado = (textos.join('\n').trim() || datos.output_text || '').trim();
-
-    if (!resultado) {
-      throw new Error(
-        'La consulta terminó sin texto. Estado: ' +
-        (datos.status || 'desconocido')
-      );
-    }
-
-    return resultado;
+  return texto;
 }
   async function enviarMensajeIA(texto) {
-    if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY === '') 
-    {
-      agregarMensajeIA('Aviso', 'Todavía falta configurar la clave de OpenRouter en el código.');
-      return;
-    }
-
+   
     const boton = document.getElementById('btnEnviarIA');
     const entrada = document.getElementById('entradaIA');
     boton.disabled = true;
